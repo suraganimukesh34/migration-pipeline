@@ -109,6 +109,22 @@ Reviewing a skill version as a PR: after `propose`, merging the PR accepts it; t
 `pipeline.py adopt <n>` so the pipeline records it. Closing the PR discards the proposal; the version
 stays saved.
 
+### Run it on a schedule (Windows)
+
+`scheduled_run.ps1` runs `pipeline.py run` for an app repo and appends the result to
+`logs/scheduled-run.log`. It reads the tokens from your user environment variables. It only ever writes a
+**pending** version, and only when the trigger says one is due; it never adopts. Register it once to
+check every morning:
+
+```
+$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File "<this folder>\scheduled_run.ps1" -Owner <owner> -Repo <repo>' -WorkingDirectory '<this folder>'
+Register-ScheduledTask -TaskName 'MigrationPipeline-SkillCheck' -Action $action -Trigger (New-ScheduledTaskTrigger -Daily -At 9:00am) -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable)
+```
+
+A daily check is cheap: most days the run reports "Not due". The machine must be on and you signed in
+(missed runs start when it is available). To remove it: `Unregister-ScheduledTask -TaskName
+MigrationPipeline-SkillCheck`.
+
 ### A typical round
 
 1. `run`, read the change log, adopt the version (or `propose` it and merge the PR).

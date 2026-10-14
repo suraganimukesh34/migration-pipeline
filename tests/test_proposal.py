@@ -265,5 +265,51 @@ class EvidenceOnlyRunTests(unittest.TestCase):
         self.assertIn("Created v2", out)
 
 
+class RunThenProposeTests(Workspace):
+    """`run --propose-repo-path` puts a newly created version up for review; no version, no PR."""
+
+    def setUp(self):
+        super().setUp()
+        self.skills = self.store.root.parent / "run-skills"
+        self.config = self.skills.parent / "config.json"
+        self.config.write_text(json.dumps({"trigger": {"mode": "either", "new_commits": 10, "schedule_days": 7}}),
+                               encoding="utf-8")
+
+    def run_cli(self, *args):
+        out, err = io.StringIO(), io.StringIO()
+        calls = []
+
+        def call(name, arguments, profile=mcp_client.READ):
+            calls.append(name)
+            return [] if name == "list_pull_requests" else {"html_url": PR_URL, "number": 5}
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err), \
+                mock.patch.object(mcp_client, "call_tool", call), mock.patch.object(mcp_client, "close_session"):
+            code = pipeline.main(["--config", str(self.config), "--skills-dir", str(self.skills), *args])
+        return code, out.getvalue(), err.getvalue(), calls
+
+    def test_a_new_version_is_proposed_and_a_run_with_nothing_new_is_not(self):
+        propose = ("--propose-repo-path", str(self.repo), "--propose-repo", "octo/repo")
+        code, out, err, calls = self.run_cli("run", "--local", FIXTURE, *propose)
+        self.assertEqual(code, 0, err)
+        self.assertIn("Created v1 (pending)", out)
+        self.assertIn(f"Proposed v1 as {PR_URL}", out)
+        self.assertIn("skill/v1", git(self.origin, "branch", "--list"))
+        code, out, _, calls = self.run_cli("run", "--local", FIXTURE, *propose)
+        self.assertIn("Not due", out)
+        self.assertEqual(calls, [])                                          # nothing new, so no PR traffic at all
+
+    def test_the_clone_is_brought_up_to_date_before_proposing(self):
+        other = self.origin.parent / "other"
+        git(self.origin.parent, "clone", "-q", "-b", "main", str(self.origin), str(other))
+        (other / "later.txt").write_text("x", encoding="utf-8")
+        git(other, "add", "-A")
+        git(other, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "later")
+        git(other, "push", "-q", "origin", "main")
+        code, out, err, _ = self.run_cli("run", "--local", FIXTURE, "--propose-repo-path", str(self.repo),
+                                         "--propose-repo", "octo/repo")
+        self.assertEqual(code, 0, err)
+        self.assertTrue((self.repo / "later.txt").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

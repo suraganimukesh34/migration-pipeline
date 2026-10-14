@@ -115,6 +115,11 @@ def cmd_run(args, config: dict, store: SkillStore) -> int:
     print()
     print((store.root / f"v{version}" / "CHANGES.md").read_text(encoding="utf-8"))
     print(f"Review the changes, then adopt it:  py -3 pipeline.py adopt {version}")
+    if args.propose_repo_path:
+        # The version is already saved; if this fails, `propose` can be run again by hand.
+        proposal.update_base(Path(args.propose_repo_path), args.propose_base)
+        return cmd_propose(argparse.Namespace(version=version, repo_path=args.propose_repo_path,
+                                              repo=args.propose_repo, base=args.propose_base), config, store)
     return 0
 
 
@@ -261,6 +266,10 @@ def build_parser() -> argparse.ArgumentParser:
     source.add_argument("--mcp", nargs=2, metavar=("OWNER", "REPO"), help="read the repo through GitHub's MCP server")
     source.add_argument("--local", metavar="REPO", help="read a local clone with the git CLI")
     run.add_argument("--force", action="store_true", help="ignore the trigger and the no-change check")
+    run.add_argument("--propose-repo-path", metavar="CLONE",
+                     help="when a new version is created, also put it up for review as a PR from this local clone")
+    run.add_argument("--propose-repo", metavar="OWNER/NAME", help="default: read from the clone's 'origin' remote")
+    run.add_argument("--propose-base", default="main", help="the branch the skill is merged into (default: main)")
     run.set_defaults(func=cmd_run)
 
     sub.add_parser("status", help="show versions and the trigger baseline").set_defaults(func=cmd_status)

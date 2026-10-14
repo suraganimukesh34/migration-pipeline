@@ -93,6 +93,7 @@ Run from this folder.
 | Task | Command |
 |---|---|
 | Learn from the history; writes a pending version if one is due (`--force` ignores the trigger) | `py -3 pipeline.py run --mcp <owner> <repo>` |
+| Same, and if a version is created, also put it up as a draft PR from a local clone | `py -3 pipeline.py run --mcp <owner> <repo> --propose-repo-path <local clone> --propose-repo <owner>/<name>` |
 | Show versions and the trigger baseline | `py -3 pipeline.py status` |
 | Adopt a version and install it for the agent | `py -3 pipeline.py adopt <n> --install-to <repo>/.claude/skills` |
 | Return to the previous version | `py -3 pipeline.py rollback --install-to <repo>/.claude/skills` |
@@ -112,12 +113,15 @@ stays saved.
 ### Run it on a schedule (Windows)
 
 `scheduled_run.ps1` runs `pipeline.py run` for an app repo and appends the result to
-`logs/scheduled-run.log`. It reads the tokens from your user environment variables. It only ever writes a
-**pending** version, and only when the trigger says one is due; it never adopts. Register it once to
-check every morning:
+`logs/scheduled-run.log`. It reads the tokens from your user environment variables. It only writes a
+version when the trigger says one is due and the rules changed; it never adopts one. With
+`-ProposeRepo <owner>/<name>`, a new version is also opened as a draft PR on that repo (branch
+`skill/v<n>`, change log as the description), from a clone it keeps in `.proposals/`. Merging that PR is
+the review; then run `pipeline.py adopt <n>`. Without `-ProposeRepo` the version just waits as pending.
+Register it once to check every morning:
 
 ```
-$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File "<this folder>\scheduled_run.ps1" -Owner <owner> -Repo <repo>' -WorkingDirectory '<this folder>'
+$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File "<this folder>\scheduled_run.ps1" -Owner <owner> -Repo <repo> -ProposeRepo <owner>/<name>' -WorkingDirectory '<this folder>'
 Register-ScheduledTask -TaskName 'MigrationPipeline-SkillCheck' -Action $action -Trigger (New-ScheduledTaskTrigger -Daily -At 9:00am) -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable)
 ```
 

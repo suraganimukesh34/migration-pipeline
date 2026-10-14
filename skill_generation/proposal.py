@@ -34,6 +34,12 @@ def branch_name(version: int) -> str:
     return f"skill/v{version}"
 
 
+def update_base(repo: Path, base: str = "main") -> None:
+    """Bring the clone's base branch up to date, so the proposal is made against what is on GitHub."""
+    if _git(repo, "branch", "--show-current") == base and not _git(repo, "status", "--porcelain"):
+        _git(repo, "pull", "--ff-only", "origin", base)
+
+
 def prepare_branch(store_root: Path, version: int, repo: Path, base: str = "main") -> str:
     """Create skill/v<N> from the base branch with the version's skill installed and committed."""
     source = Path(store_root) / f"v{version}" / SKILL_NAME

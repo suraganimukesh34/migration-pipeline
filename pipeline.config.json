@@ -1,0 +1,8 @@
+{
+  "skills_dir": "skills",
+  "trigger": {
+    "mode": "either",
+    "new_commits": 10,
+    "schedule_days": 7
+  }
+}

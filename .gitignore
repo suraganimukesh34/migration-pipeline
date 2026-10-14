@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+
+# separate repos, cloned into place (see README Setup)
+fixtures/migration-fixture-android/
+claude_agent/demo/

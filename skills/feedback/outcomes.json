@@ -1,0 +1,37 @@
+{
+  "suraganimukesh34/acme-shop#1": {
+    "repo": "suraganimukesh34/acme-shop",
+    "pr": 1,
+    "title": "Migrate orders to Kotlin",
+    "head": "migrate/orders-to-kotlin",
+    "url": "https://github.com/suraganimukesh34/acme-shop/pull/1",
+    "state": "merged",
+    "draft": false,
+    "patterns": [
+      "getter_to_property",
+      "nullable_types",
+      "static_to_companion",
+      "constructor_to_primary_val",
+      "loop_to_collection_operation",
+      "anon_class_to_lambda",
+      "anon_class_to_object_expression",
+      "collection_constructor",
+      "null_ternary_to_elvis",
+      "equals_to_operator",
+      "interface_to_fun_interface"
+    ],
+    "skill_version": 1,
+    "approved": false,
+    "changes_requested": false,
+    "votes": [
+      {
+        "pattern": "static_to_companion",
+        "verdict": "reject",
+        "reason": "utility classes should be objects",
+        "by": "suraganimukesh34"
+      }
+    ],
+    "updated_at": "2026-10-13T11:49:08Z",
+    "collected_at": "2026-10-13T11:49:51.112289+00:00"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "current": 1,
+  "adopted": [
+    1,
+    2,
+    1,
+    2,
+    1
+  ],
+  "versions": {
+    "1": {
+      "created": "2026-10-13T11:07:34.578454+00:00",
+      "pairs": 17,
+      "commits": 17,
+      "patterns": 15,
+      "status": "current"
+    },
+    "2": {
+      "created": "2026-10-13T11:51:31.315733+00:00",
+      "pairs": 17,
+      "commits": 17,
+      "patterns": 15,
+      "status": "proposed",
+      "proposal": "https://github.com/suraganimukesh34/acme-shop/pull/2"
+    }
+  },
+  "baseline": {
+    "commits": 17,
+    "at": "2026-10-13T11:51:31.315733+00:00",
+    "feedback": 2
+  }
+}

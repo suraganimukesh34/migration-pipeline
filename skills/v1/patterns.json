@@ -1,0 +1,404 @@
+{
+  "generated_from": {
+    "pairs": 17,
+    "commits": 17
+  },
+  "patterns": [
+    {
+      "id": "constructor_to_primary_val",
+      "category": "constructors",
+      "rule": "Constructors that only assign fields (this.x = x) become primary-constructor val/var parameters.",
+      "confidence": "medium",
+      "sources": {
+        "commits": 9,
+        "pairs": 9
+      },
+      "examples": [
+        {
+          "file": "Logger.java",
+          "commit": "008c617",
+          "java": "public Logger(String scope) {\n    this.scope = scope;\n}",
+          "kotlin": "class Logger(private val scope: String) {"
+        },
+        {
+          "file": "OrderAdapter.java",
+          "commit": "ad787bc",
+          "java": "public OrderAdapter(List<Order> orders) {\n    this.orders = orders;\n}",
+          "kotlin": "class OrderAdapter(private val orders: List<Order>) {"
+        },
+        {
+          "file": "UserViewModel.java",
+          "commit": "175da5d",
+          "java": "public UserViewModel(UserRepository repository) {\n    this.repository = repository;\n}",
+          "kotlin": "class UserViewModel(private val repository: UserRepository) {"
+        }
+      ]
+    },
+    {
+      "id": "getter_to_property",
+      "category": "properties",
+      "rule": "getFoo() calls become property access (.foo).",
+      "confidence": "medium",
+      "sources": {
+        "commits": 8,
+        "pairs": 8
+      },
+      "examples": [
+        {
+          "file": "ProductRepository.java",
+          "commit": "5e85c18",
+          "java": "products.put(product.getId(), product);",
+          "kotlin": "products[product.id] = product"
+        },
+        {
+          "file": "CartService.java",
+          "commit": "dba01f7",
+          "java": "if (product != null && product.isInStock()) {",
+          "kotlin": "if (product != null && product.inStock) {"
+        },
+        {
+          "file": "UserViewModel.java",
+          "commit": "175da5d",
+          "java": "displayName = user != null ? user.getName() : \"Unknown\";",
+          "kotlin": "displayName = user?.name ?: \"Unknown\""
+        }
+      ]
+    },
+    {
+      "id": "nullable_types",
+      "category": "null_safety",
+      "rule": "Values that can be null in Java (null returns, null checks) are declared with nullable Kotlin types (T?).",
+      "confidence": "medium",
+      "sources": {
+        "commits": 8,
+        "pairs": 8
+      },
+      "examples": [
+        {
+          "file": "UserRepository.java",
+          "commit": "65cd4ce",
+          "java": "return null;",
+          "kotlin": "fun findById(id: String): User? = users.firstOrNull { it.id == id }"
+        },
+        {
+          "file": "OrderRepository.java",
+          "commit": "9d906b6",
+          "java": "return null;",
+          "kotlin": "fun findById(id: String): Order? = orders.firstOrNull { it.id == id }"
+        },
+        {
+          "file": "ProductViewModel.java",
+          "commit": "22b7bc2",
+          "java": "if (product == null) {",
+          "kotlin": "var label: String? = null"
+        }
+      ]
+    },
+    {
+      "id": "collection_constructor",
+      "category": "collections",
+      "rule": "new ArrayList<>() / HashMap<>() become mutableListOf() / mutableMapOf().",
+      "confidence": "medium",
+      "sources": {
+        "commits": 4,
+        "pairs": 4
+      },
+      "examples": [
+        {
+          "file": "UserRepository.java",
+          "commit": "65cd4ce",
+          "java": "private final List<User> users = new ArrayList<>();",
+          "kotlin": "private val users = mutableListOf<User>()"
+        },
+        {
+          "file": "OrderRepository.java",
+          "commit": "9d906b6",
+          "java": "private final List<Order> orders = new ArrayList<>();",
+          "kotlin": "private val orders = mutableListOf<Order>()"
+        },
+        {
+          "file": "CartService.java",
+          "commit": "dba01f7",
+          "java": "private final List<Product> items = new ArrayList<>();",
+          "kotlin": "private val items = mutableListOf<Product>()"
+        }
+      ]
+    },
+    {
+      "id": "data_class",
+      "category": "data_classes",
+      "rule": "A Java class made of private fields and getters becomes a Kotlin data class.",
+      "confidence": "medium",
+      "sources": {
+        "commits": 4,
+        "pairs": 4
+      },
+      "examples": [
+        {
+          "file": "User.java",
+          "commit": "7f0e0ea",
+          "java": "private final String id;\n// ...\npublic String getId() {\n    return id;\n}",
+          "kotlin": "data class User(\n    val id: String,\n    val name: String,\n    val email: String,\n)"
+        },
+        {
+          "file": "Order.java",
+          "commit": "817fb08",
+          "java": "private final String id;\n// ...\npublic String getId() {\n    return id;\n}",
+          "kotlin": "data class Order(\n    val id: String,\n    val userId: String,\n    val total: Double,\n)"
+        },
+        {
+          "file": "Address.java",
+          "commit": "136fd8e",
+          "java": "private final String street;\n// ...\npublic String getStreet() {\n    return street;\n}",
+          "kotlin": "data class Address(\n    val street: String,\n    val city: String,\n    val zip: String,\n)"
+        }
+      ]
+    },
+    {
+      "id": "loop_to_collection_operation",
+      "category": "collections",
+      "rule": "for-each loops that build or test collections become map/filter/any/all/count operations.",
+      "confidence": "medium",
+      "sources": {
+        "commits": 4,
+        "pairs": 4
+      },
+      "examples": [
+        {
+          "file": "CartService.java",
+          "commit": "dba01f7",
+          "java": "public double total() {\n    double sum = 0;\n    for (Product item : items) {\n        sum += item.getPrice();\n    }\n    return sum;\n}",
+          "kotlin": "fun total(): Double = items.sumOf { it.price }"
+        },
+        {
+          "file": "OrderAdapter.java",
+          "commit": "ad787bc",
+          "java": "public List<String> titles() {\n    List<String> titles = new ArrayList<>();\n    for (Order order : orders) {\n        titles.add(order.getId() + \": \" + order.getTotal());\n    }\n    return titles;\n}",
+          "kotlin": "fun titles(): List<String> = orders.map { \"${it.id}: ${it.total}\" }"
+        },
+        {
+          "file": "OrderRepository.java",
+          "commit": "9d906b6",
+          "java": "public Order findById(String id) {\n    for (Order order : orders) {\n        if (order.getId().equals(id)) {\n            return order;\n        }\n    }\n    return null;\n}",
+          "kotlin": "fun findByUser(userId: String): List<Order> = orders.filter { it.userId == userId }"
+        }
+      ]
+    },
+    {
+      "id": "getter_only_to_private_set",
+      "category": "properties",
+      "rule": "A private field with a getter and no setter becomes a var with a private set.",
+      "confidence": "medium",
+      "sources": {
+        "commits": 3,
+        "pairs": 3
+      },
+      "examples": [
+        {
+          "file": "ProductViewModel.java",
+          "commit": "22b7bc2",
+          "java": "public String getLabel() {\n    return label;\n}",
+          "kotlin": "var label: String? = null\n    private set"
+        },
+        {
+          "file": "OrderViewModel.java",
+          "commit": "a9d4408",
+          "java": "public String getSummary() {\n    return summary;\n}",
+          "kotlin": "var summary: String? = null\n    private set"
+        },
+        {
+          "file": "UserViewModel.java",
+          "commit": "175da5d",
+          "java": "public String getDisplayName() {\n    return displayName;\n}",
+          "kotlin": "var displayName: String? = null\n    private set"
+        }
+      ]
+    },
+    {
+      "id": "anon_class_to_lambda",
+      "category": "lambdas",
+      "rule": "Anonymous single-method classes passed as callbacks become lambdas.",
+      "confidence": "low",
+      "sources": {
+        "commits": 2,
+        "pairs": 2
+      },
+      "examples": [
+        {
+          "file": "MainActivity.java",
+          "commit": "a352317",
+          "java": "refresh.setOnClickListener(new View.OnClickListener() {\n    @Override\n    public void onClick(View v) {\n        title.setText(\"Refreshed\");\n    }\n});",
+          "kotlin": "binding.refresh.setOnClickListener {\n    binding.title.text = \"Refreshed\"\n}"
+        },
+        {
+          "file": "UserViewModel.java",
+          "commit": "175da5d",
+          "java": "public void loadUser(String id) {\n    repository.load(id, new UserRepository.Callback() {\n        @Override\n        public void onResult(User user) {\n            displayName = user != null ? user.getName() : \"Unknown\";\n        }\n    });\n}",
+          "kotlin": "fun loadUser(id: String) {\n    repository.load(id) { user ->\n        displayName = user?.name ?: \"Unknown\"\n    }\n}"
+        }
+      ]
+    },
+    {
+      "id": "equals_to_operator",
+      "category": "operators",
+      "rule": "a.equals(b) becomes a == b.",
+      "confidence": "low",
+      "sources": {
+        "commits": 2,
+        "pairs": 2
+      },
+      "examples": [
+        {
+          "file": "UserRepository.java",
+          "commit": "65cd4ce",
+          "java": "if (user.getId().equals(id)) {",
+          "kotlin": "fun findById(id: String): User? = users.firstOrNull { it.id == id }"
+        },
+        {
+          "file": "OrderRepository.java",
+          "commit": "9d906b6",
+          "java": "if (order.getId().equals(id)) {",
+          "kotlin": "fun findById(id: String): Order? = orders.firstOrNull { it.id == id }"
+        }
+      ]
+    },
+    {
+      "id": "interface_to_fun_interface",
+      "category": "interfaces",
+      "rule": "Single-method callback interfaces become fun interfaces so callers can pass lambdas.",
+      "confidence": "low",
+      "sources": {
+        "commits": 2,
+        "pairs": 2
+      },
+      "examples": [
+        {
+          "file": "UserRepository.java",
+          "commit": "65cd4ce",
+          "java": "public interface Callback {\n    void onResult(User user);\n}",
+          "kotlin": "fun interface Callback {\n    fun onResult(user: User?)\n}"
+        },
+        {
+          "file": "ApiCallback.java",
+          "commit": "2a30d95",
+          "java": "public interface ApiCallback {\n    void onResult(String body);\n}",
+          "kotlin": "fun interface ApiCallback {\n    fun onResult(body: String)\n}"
+        }
+      ]
+    },
+    {
+      "id": "loop_to_first_or_null",
+      "category": "collections",
+      "rule": "A for-loop that returns the first match (or null) becomes firstOrNull { ... }.",
+      "confidence": "low",
+      "sources": {
+        "commits": 2,
+        "pairs": 2
+      },
+      "examples": [
+        {
+          "file": "UserRepository.java",
+          "commit": "65cd4ce",
+          "java": "public User findById(String id) {\n    for (User user : users) {\n        if (user.getId().equals(id)) {\n            return user;\n        }\n    }\n    return null;\n}",
+          "kotlin": "fun findById(id: String): User? = users.firstOrNull { it.id == id }"
+        },
+        {
+          "file": "OrderRepository.java",
+          "commit": "9d906b6",
+          "java": "public Order findById(String id) {\n    for (Order order : orders) {\n        if (order.getId().equals(id)) {\n            return order;\n        }\n    }\n    return null;\n}",
+          "kotlin": "fun findById(id: String): Order? = orders.firstOrNull { it.id == id }"
+        }
+      ]
+    },
+    {
+      "id": "null_ternary_to_elvis",
+      "category": "null_safety",
+      "rule": "x != null ? x.foo() : default becomes x?.foo() ?: default.",
+      "confidence": "low",
+      "sources": {
+        "commits": 2,
+        "pairs": 2
+      },
+      "examples": [
+        {
+          "file": "UserViewModel.java",
+          "commit": "175da5d",
+          "java": "displayName = user != null ? user.getName() : \"Unknown\";",
+          "kotlin": "displayName = user?.name ?: \"Unknown\""
+        },
+        {
+          "file": "OrderViewModel.java",
+          "commit": "a9d4408",
+          "java": "summary = order != null ? \"Total: \" + order.getTotal() : \"No order\";",
+          "kotlin": "summary = order?.let { \"Total: ${it.total}\" } ?: \"No order\""
+        }
+      ]
+    },
+    {
+      "id": "static_to_companion",
+      "category": "statics",
+      "rule": "static members move into a companion object (or top-level declarations).",
+      "confidence": "low",
+      "sources": {
+        "commits": 2,
+        "pairs": 2
+      },
+      "examples": [
+        {
+          "file": "Logger.java",
+          "commit": "008c617",
+          "java": "private static final String TAG = \"Fixture\";",
+          "kotlin": "companion object {\n    private const val TAG = \"Fixture\"\n    fun forScope(scope: String): Logger = Logger(scope)\n}"
+        },
+        {
+          "file": "StringUtils.java",
+          "commit": "bf7c993",
+          "java": "public static boolean isBlank(String value) {",
+          "kotlin": "object StringUtils {\n    fun isBlank(value: String?): Boolean = value == null || value.trim().isEmpty()\n    fun capitalize(value: String?): String? {\n        if (value.isNullOrEmpty()) {\n            return value\n        }\n        return value.replaceFirstChar { it.uppercase() }\n    }\n}"
+        }
+      ]
+    },
+    {
+      "id": "anon_class_to_object_expression",
+      "category": "lambdas",
+      "rule": "Anonymous classes that cannot be a lambda become object expressions (object : Type { ... }).",
+      "confidence": "low",
+      "sources": {
+        "commits": 1,
+        "pairs": 1
+      },
+      "examples": [
+        {
+          "file": "ApiClient.java",
+          "commit": "345fc99",
+          "java": "public void fetchDefault() {\n    fetch(\"/ping\", new Listener() {\n        @Override\n        public void onSuccess(String body) {\n            System.out.println(body);\n        }\n        @Override\n        public void onError(int code) {\n            System.out.println(\"error \" + code);\n        }\n    });\n}",
+          "kotlin": "fun fetchDefault() {\n    fetch(\"/ping\", object : Listener {\n        override fun onSuccess(body: String) {\n            println(body)\n        }\n        override fun onError(code: Int) {\n            println(\"error $code\")\n        }\n    })\n}"
+        }
+      ]
+    },
+    {
+      "id": "find_view_by_id_to_binding",
+      "category": "android_views",
+      "rule": "findViewById calls are replaced with view binding.",
+      "confidence": "low",
+      "sources": {
+        "commits": 1,
+        "pairs": 1
+      },
+      "examples": [
+        {
+          "file": "MainActivity.java",
+          "commit": "a352317",
+          "java": "title = findViewById(R.id.title);",
+          "kotlin": "binding = ActivityMainBinding.inflate(layoutInflater)"
+        }
+      ]
+    }
+  ],
+  "feedback": {
+    "decided": 0,
+    "pending": 0,
+    "demoted": [],
+    "dropped": []
+  }
+}

@@ -64,17 +64,16 @@ Claude standing in for the Copilot agent, so it can be tested outside the client
 
 ## Setup
 
-Clone this repo, then clone the two sample repos it works against into the folders below. They are
-separate repos, so they are not stored inside this one:
+Clone this repo. The pipeline reads the app repo's history over GitHub MCP, so the app repo needs no
+clone (the sample used here is `suraganimukesh34/migration-fixture-android`). The agent works in a
+sandbox repo, which it needs cloned. It is a separate repo, so it is not stored inside this one:
 
 ```
-git clone https://github.com/suraganimukesh34/migration-fixture-android fixtures/migration-fixture-android
 git clone https://github.com/suraganimukesh34/acme-shop claude_agent/demo/orders-app
 ```
 
-The first is a sample app repo to practice on (`run --local fixtures/migration-fixture-android`). The second is the sandbox repo the agent
-converts a module in. To use your own repos, point the commands at them instead. `skills/` holds output
-from a real run (skill v1 and v2, collected review outcomes) as an example. Delete it to start fresh.
+To use your own repos, point the commands at them instead. The `skills/` folder is generated output
+(versions, collected review outcomes); it is created by the first `run`.
 
 - Python 3 and the MCP package: `py -3 -m pip install mcp`.
 - `GITHUB_TOKEN`: a read-only fine-grained token for the app repo (history).
@@ -127,7 +126,6 @@ stays saved.
 | `skill_generation/` | renders the skill (Copilot/Claude skill format); versions, change log, trigger; proposing a version as a PR |
 | `feedback_loop/` | reads what reviewers decided and applies it to the pattern set |
 | `claude_agent/` | the migration agent, its command, and a demo clone of the sandbox repo |
-| `fixtures/` | a synthetic repo history standing in for the app repo (clone it here, see Setup) |
 | `skills/` | generated output: versions, the adopted skill, collected review outcomes |
 
 ## Not here yet

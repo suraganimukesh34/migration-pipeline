@@ -72,7 +72,7 @@ git clone https://github.com/suraganimukesh34/migration-fixture-android fixtures
 git clone https://github.com/suraganimukesh34/acme-shop claude_agent/demo/orders-app
 ```
 
-The first is the sample app repo whose history the tests read. The second is the sandbox repo the agent
+The first is a sample app repo to practice on (`run --local fixtures/migration-fixture-android`). The second is the sandbox repo the agent
 converts a module in. To use your own repos, point the commands at them instead. `skills/` holds output
 from a real run (skill v1 and v2, collected review outcomes) as an example. Delete it to start fresh.
 
@@ -110,25 +110,6 @@ Reviewing a skill version as a PR: after `propose`, merging the PR accepts it; t
 `pipeline.py adopt <n>` so the pipeline records it. Closing the PR discards the proposal; the version
 stays saved.
 
-### Run it on a schedule (Windows)
-
-`scheduled_run.ps1` runs `pipeline.py run` for an app repo and appends the result to
-`logs/scheduled-run.log`. It reads the tokens from your user environment variables. It only writes a
-version when the trigger says one is due and the rules changed; it never adopts one. With
-`-ProposeRepo <owner>/<name>`, a new version is also opened as a draft PR on that repo (branch
-`skill/v<n>`, change log as the description), from a clone it keeps in `.proposals/`. Merging that PR is
-the review; then run `pipeline.py adopt <n>`. Without `-ProposeRepo` the version just waits as pending.
-Register it once to check every morning:
-
-```
-$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File "<this folder>\scheduled_run.ps1" -Owner <owner> -Repo <repo> -ProposeRepo <owner>/<name>' -WorkingDirectory '<this folder>'
-Register-ScheduledTask -TaskName 'MigrationPipeline-SkillCheck' -Action $action -Trigger (New-ScheduledTaskTrigger -Daily -At 9:00am) -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable)
-```
-
-A daily check is cheap: most days the run reports "Not due". The machine must be on and you signed in
-(missed runs start when it is available). To remove it: `Unregister-ScheduledTask -TaskName
-MigrationPipeline-SkillCheck`.
-
 ### A typical round
 
 1. `run`, read the change log, adopt the version (or `propose` it and merge the PR).
@@ -146,9 +127,8 @@ MigrationPipeline-SkillCheck`.
 | `skill_generation/` | renders the skill (Copilot/Claude skill format); versions, change log, trigger; proposing a version as a PR |
 | `feedback_loop/` | reads what reviewers decided and applies it to the pattern set |
 | `claude_agent/` | the migration agent, its command, and a demo clone of the sandbox repo |
-| `fixtures/` | a synthetic repo history standing in for the app repo, used by the tests |
+| `fixtures/` | a synthetic repo history standing in for the app repo (clone it here, see Setup) |
 | `skills/` | generated output: versions, the adopted skill, collected review outcomes |
-| `tests/` | `py -3 -m unittest discover -s tests` |
 
 ## Not here yet
 
